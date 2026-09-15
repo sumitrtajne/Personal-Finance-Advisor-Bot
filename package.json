@@ -1,0 +1,9 @@
+{
+  "name": "personal-finance-advisor-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SkillWallet AI Specialist capstone",
+  "scripts": {
+    "start": "python app.py"
+  }
+}
