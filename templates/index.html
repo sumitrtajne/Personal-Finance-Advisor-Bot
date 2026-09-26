@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Personal Finance Advisor</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033}
+.container{max-width:1000px;margin:30px auto;padding:20px}.card{background:#fff;border-radius:16px;padding:24px;margin-bottom:18px;box-shadow:0 4px 18px #0001}
+h1{margin:0 0 8px;font-size:32px}.sub{color:#64748b;margin-bottom:22px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.full{grid-column:1/-1}
+label{display:block;font-weight:700;margin-bottom:6px}input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font-size:15px}
+.expense-row{display:grid;grid-template-columns:1fr 180px;gap:10px;margin-bottom:10px}
+button{border:0;border-radius:9px;padding:12px 18px;cursor:pointer;font-weight:700}
+.primary{background:#2563eb;color:#fff}.secondary{background:#e2e8f0;color:#172033}.remove{background:#fee2e2;color:#991b1b;padding:8px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.hidden{display:none}.results{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat{background:#eff6ff;border-radius:12px;padding:16px}.stat small{display:block;color:#64748b}.stat strong{font-size:22px}
+table{width:100%;border-collapse:collapse;margin-top:10px}th,td{text-align:left;padding:10px;border-bottom:1px solid #e2e8f0}
+.badge{display:inline-block;padding:5px 9px;border-radius:20px;background:#dcfce7;color:#166534;font-size:12px;font-weight:700}
+.error{background:#fee2e2;color:#991b1b;padding:12px;border-radius:9px;margin-top:12px}
+@media(max-width:700px){.grid,.results{grid-template-columns:1fr}.expense-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="card">
+<h1>Personal Finance Advisor</h1>
+<div class="sub">Enter your monthly income and expenses to get a budget, spending analysis and saving suggestions.</div>
+<div class="grid">
+<div><label>Name</label><input id="name" value="Sumit"></div>
+<div><label>Monthly Income (₹)</label><input id="income" type="number" value="30000"></div>
+<div class="full"><label>Financial Goal</label>
+<select id="goal"><option>Emergency Fund</option><option>Vacation</option><option>Gadget Purchase</option><option>Investment</option></select></div>
+<div class="full"><label>Monthly Expenses</label><div id="expenses"></div>
+<button class="secondary" type="button" onclick="addExpense()">+ Add Expense</button></div>
+</div>
+<div class="actions"><button class="primary" onclick="analyse()">Analyse My Finances</button><button class="secondary" onclick="resetForm()">Reset</button></div>
+<div id="error" class="error hidden"></div>
+</div>
+
+<div id="results" class="hidden">
+<div class="card"><h2>Financial Summary</h2><div class="results">
+<div class="stat"><small>Income</small><strong id="rIncome">₹0</strong></div>
+<div class="stat"><small>Expenses</small><strong id="rExpense">₹0</strong></div>
+<div class="stat"><small>Balance</small><strong id="rBalance">₹0</strong></div>
+<div class="stat"><small>Saving Rate</small><strong id="rRate">0%</strong></div>
+</div><p id="summary"></p><span class="badge" id="source"></span></div>
+<div class="card"><h2>Spending Analysis</h2><table><thead><tr><th>Category</th><th>Spent</th><th>% Income</th><th>Status</th><th>Message</th></tr></thead><tbody id="analysis"></tbody></table></div>
+<div class="card"><h2>Recommended Budget</h2><table><thead><tr><th>Category</th><th>Recommended</th><th>%</th><th>Reason</th></tr></thead><tbody id="budget"></tbody></table></div>
+<div class="card"><h2>Saving Suggestions</h2><div id="suggestions"></div></div>
+</div>
+</div>
+<script>
+const defaults=[["Rent",8000],["Food",2500],["Transport",2000],["Dining",1500],["Entertainment",2500],["Utilities",2000],["Shopping",1000]];
+function addExpense(cat="",amt=""){const d=document.createElement("div");d.className="expense-row";d.innerHTML=`<input class="ec" placeholder="Category" value="${cat}"><input class="ea" type="number" placeholder="Amount" value="${amt}"><button class="remove" type="button" onclick="this.parentElement.remove()">Remove</button>`;document.getElementById("expenses").appendChild(d)}
+defaults.forEach(x=>addExpense(x[0],x[1]));
+function money(n){return "₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2})}
+async function analyse(){
+ const error=document.getElementById("error");error.classList.add("hidden");
+ const expenses={};document.querySelectorAll(".expense-row").forEach(r=>{let c=r.querySelector(".ec").value.trim(),a=parseFloat(r.querySelector(".ea").value);if(c&&Number.isFinite(a))expenses[c]=a});
+ const payload={name:document.getElementById("name").value,income:parseFloat(document.getElementById("income").value),expenses,goal:document.getElementById("goal").value};
+ try{
+  const res=await fetch("/analyse",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  const data=await res.json();if(!res.ok||!data.success)throw new Error(data.error||"Analysis failed");
+  document.getElementById("results").classList.remove("hidden");
+  rIncome.textContent=money(data.totals.income);rExpense.textContent=money(data.totals.expense);rBalance.textContent=money(data.totals.balance);rRate.textContent=data.totals.rate+"%";summary.textContent=data.summary;source.textContent=data.source==="gemini-2.0-flash"?"Gemini AI":"Demo fallback";
+  analysis.innerHTML=data.analysis.map(x=>`<tr><td>${x.category}</td><td>${money(x.spent_amount)}</td><td>${x.percentage_of_income}%</td><td>${x.status}</td><td>${x.message}</td></tr>`).join("");
+  budget.innerHTML=data.budget.map(x=>`<tr><td>${x.category}</td><td>${money(x.recommended_amount)}</td><td>${x.percentage}%</td><td>${x.reason}</td></tr>`).join("");
+  suggestions.innerHTML=data.suggestions.map(x=>`<div style="padding:12px 0;border-bottom:1px solid #e2e8f0"><b>${x.title}</b><div>Target: ${x.target} | Amount: ${money(x.amount)}</div><div>${x.action}</div></div>`).join("");
+  document.getElementById("results").scrollIntoView({behavior:"smooth"});
+ }catch(e){error.textContent=e.message;error.classList.remove("hidden")}
+}
+function resetForm(){location.reload()}
+</script>
+</body>
+</html>
