@@ -1,77 +1,377 @@
+```html
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Personal Finance Advisor</title>
+<title>Finova | Personal Finance Advisor</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033}
-.container{max-width:1000px;margin:30px auto;padding:20px}.card{background:#fff;border-radius:16px;padding:24px;margin-bottom:18px;box-shadow:0 4px 18px #0001}
-h1{margin:0 0 8px;font-size:32px}.sub{color:#64748b;margin-bottom:22px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.full{grid-column:1/-1}
-label{display:block;font-weight:700;margin-bottom:6px}input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font-size:15px}
-.expense-row{display:grid;grid-template-columns:1fr 180px;gap:10px;margin-bottom:10px}
-button{border:0;border-radius:9px;padding:12px 18px;cursor:pointer;font-weight:700}
-.primary{background:#2563eb;color:#fff}.secondary{background:#e2e8f0;color:#172033}.remove{background:#fee2e2;color:#991b1b;padding:8px}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-.hidden{display:none}.results{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.stat{background:#eff6ff;border-radius:12px;padding:16px}.stat small{display:block;color:#64748b}.stat strong{font-size:22px}
-table{width:100%;border-collapse:collapse;margin-top:10px}th,td{text-align:left;padding:10px;border-bottom:1px solid #e2e8f0}
-.badge{display:inline-block;padding:5px 9px;border-radius:20px;background:#dcfce7;color:#166534;font-size:12px;font-weight:700}
-.error{background:#fee2e2;color:#991b1b;padding:12px;border-radius:9px;margin-top:12px}
-@media(max-width:700px){.grid,.results{grid-template-columns:1fr}.expense-row{grid-template-columns:1fr}}
+:root{--bg:#080d18;--card:#101827;--line:#243247;--text:#edf5ff;--muted:#91a2b9;--green:#10d9a0;--green2:#087f62;--red:#ff7185}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top,#142b32 0,#080d18 55%);font-family:Inter,Arial,sans-serif;color:var(--text);min-height:100vh}
+.container{max-width:1100px;margin:auto;padding:32px 20px 60px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:30px}
+.logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#10d9a0,#087f62);display:grid;place-items:center;color:#04140f;font-size:24px;font-weight:900}
+.brand{font-size:23px;font-weight:800;letter-spacing:-.7px}
+.brand span{color:var(--green)}
+.tagline{color:var(--muted);font-size:13px;margin-top:4px}
+.hero{margin-bottom:24px}
+.eyebrow{color:var(--green);font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
+h1{font-size:clamp(29px,5vw,43px);letter-spacing:-1.5px;margin:10px 0}
+.hero p{color:var(--muted);line-height:1.7;margin:0;max-width:650px}
+.card{background:linear-gradient(145deg,#121d2d,#0e1624);border:1px solid var(--line);border-radius:20px;padding:25px;margin-bottom:20px;box-shadow:0 15px 40px #0002}
+h2{font-size:19px;margin:0 0 7px}
+.description{color:var(--muted);font-size:13px;margin-bottom:22px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.full{grid-column:1/-1}
+label{display:block;font-weight:700;font-size:13px;margin-bottom:9px}
+input,select{width:100%;padding:13px 14px;background:#09111e;border:1px solid #2a3a50;border-radius:11px;color:var(--text);font-size:15px;outline:none}
+input:focus,select:focus{border-color:var(--green);box-shadow:0 0 0 3px #10d9a018}
+input::placeholder{color:#667990}
+.expense-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,180px) auto;gap:10px;margin-bottom:10px}
+button{border:0;border-radius:10px;padding:12px 17px;font-weight:750;cursor:pointer;transition:transform .15s,opacity .15s}
+button:hover{transform:translateY(-1px)}
+button:disabled{opacity:.55;cursor:wait;transform:none}
+.primary{background:var(--green);color:#04150f}
+.secondary{background:#1b293c;color:#e3edf9;border:1px solid #304157}
+.remove{background:#351b29;color:#ff9cab;padding:9px 12px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.hint{color:var(--muted);font-size:12px;margin-top:12px}
+.message{padding:13px 15px;border-radius:10px;margin-top:15px;font-size:14px;line-height:1.5}
+.error{background:#351923;border:1px solid #743344;color:#ffb1bd}
+.loading{color:var(--green);background:#102a29}
+.hidden{display:none!important}
+.results{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:20px}
+.stat{background:#0a1421;border:1px solid #25364a;border-radius:14px;padding:17px;min-width:0}
+.stat small{display:block;color:var(--muted);margin-bottom:10px}
+.stat strong{font-size:clamp(17px,2.5vw,24px);overflow-wrap:anywhere}
+.stat .accent{color:var(--green)}
+.summary{line-height:1.7;color:#d0dbea;margin:20px 0 12px}
+.badge{display:inline-block;background:#12372f;color:#6ff0c6;padding:7px 10px;border-radius:30px;font-size:12px;font-weight:750}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;margin-top:16px;min-width:550px}
+th,td{text-align:left;padding:13px 12px;border-bottom:1px solid #263449;font-size:13px;line-height:1.55}
+th{color:#9db0c8;font-weight:700;background:#0c1522}
+td{color:#e0e9f5}
+.suggestion{padding:16px 0;border-bottom:1px solid #263449}
+.suggestion:last-child{border-bottom:0}
+.suggestion b{color:var(--green);display:block;margin-bottom:7px}
+.suggestion div{color:#bdcadd;font-size:13px;line-height:1.7}
+footer{text-align:center;color:#64768d;font-size:12px;padding-top:10px}
+@media(max-width:700px){.container{padding:22px 13px 40px}.card{padding:18px;border-radius:15px}.grid,.results{grid-template-columns:1fr 1fr}.expense-row{grid-template-columns:1fr 1fr}.expense-row .remove{grid-column:1/-1}.full{grid-column:1/-1}.stat{padding:13px}.actions button{flex:1}}
+@media(max-width:420px){.results{grid-template-columns:1fr 1fr}.brand{font-size:20px}}
 </style>
 </head>
 <body>
 <div class="container">
-<div class="card">
-<h1>Personal Finance Advisor</h1>
-<div class="sub">Enter your monthly income and expenses to get a budget, spending analysis and saving suggestions.</div>
-<div class="grid">
-<div><label>Name</label><input id="name" value="Sumit"></div>
-<div><label>Monthly Income (₹)</label><input id="income" type="number" value="30000"></div>
-<div class="full"><label>Financial Goal</label>
-<select id="goal"><option>Emergency Fund</option><option>Vacation</option><option>Gadget Purchase</option><option>Investment</option></select></div>
-<div class="full"><label>Monthly Expenses</label><div id="expenses"></div>
-<button class="secondary" type="button" onclick="addExpense()">+ Add Expense</button></div>
-</div>
-<div class="actions"><button class="primary" onclick="analyse()">Analyse My Finances</button><button class="secondary" onclick="resetForm()">Reset</button></div>
-<div id="error" class="error hidden"></div>
+<header>
+  <div class="logo">₹</div>
+  <div><div class="brand">FINO<span>VA</span></div><div class="tagline">PERSONAL FINANCE ADVISOR</div></div>
+</header>
+
+<section class="hero">
+  <div class="eyebrow">Your money. Your future.</div>
+  <h1>Take control of your <span style="color:var(--green)">finances.</span></h1>
+  <p>Understand your spending, build a practical budget and make progress towards your financial goals.</p>
+</section>
+
+<section class="card">
+  <h2>Financial Details</h2>
+  <div class="description">Enter your details to generate a personalised analysis.</div>
+  <form id="financeForm">
+    <div class="grid">
+      <div>
+        <label for="name">Your Name</label>
+        <input id="name" maxlength="100" placeholder="Enter your name" autocomplete="name">
+      </div>
+      <div>
+        <label for="income">Monthly Income (₹)</label>
+        <input id="income" type="number" min="0.01" max="100000000" step="0.01" placeholder="Enter monthly income" required>
+      </div>
+      <div class="full">
+        <label for="goal">Financial Goal</label>
+        <select id="goal">
+          <option value="Emergency Fund">Emergency Fund</option>
+          <option value="Vacation">Vacation</option>
+          <option value="Gadget Purchase">Gadget Purchase</option>
+          <option value="Investment">Investment</option>
+        </select>
+      </div>
+      <div class="full">
+        <label>Monthly Expenses</label>
+        <div id="expenses"></div>
+        <button class="secondary" id="addBtn" type="button">+ Add Expense</button>
+        <div class="hint">Add each category and its monthly amount. Leave unused rows blank.</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="primary" id="analyseBtn" type="submit">Analyse My Finances →</button>
+      <button class="secondary" id="resetBtn" type="button">Reset Form</button>
+    </div>
+    <div id="error" class="message error hidden" role="alert"></div>
+    <div id="loading" class="message loading hidden" role="status">Analysing your finances… please wait.</div>
+  </form>
+</section>
+
+<section id="results" class="hidden" aria-live="polite">
+  <div class="card">
+    <h2>Financial Overview</h2>
+    <div class="description">Your monthly financial snapshot</div>
+    <div class="results">
+      <div class="stat"><small>Monthly Income</small><strong id="rIncome">₹0</strong></div>
+      <div class="stat"><small>Total Expenses</small><strong id="rExpense">₹0</strong></div>
+      <div class="stat"><small>Remaining Balance</small><strong id="rBalance" class="accent">₹0</strong></div>
+      <div class="stat"><small>Saving Rate</small><strong id="rRate" class="accent">0%</strong></div>
+    </div>
+    <p id="summary" class="summary"></p>
+    <span class="badge" id="source"></span>
+  </div>
+
+  <div class="card">
+    <h2>Spending Analysis</h2>
+    <div class="description">Understand where your income goes.</div>
+    <div class="table-wrap"><table><thead><tr><th>Category</th><th>Spent</th><th>% Income</th><th>Status</th><th>Message</th></tr></thead><tbody id="analysis"></tbody></table></div>
+  </div>
+
+  <div class="card">
+    <h2>Recommended Budget</h2>
+    <div class="description">Suggested category budgets based on the analysis.</div>
+    <div class="table-wrap"><table><thead><tr><th>Category</th><th>Recommended</th><th>%</th><th>Reason</th></tr></thead><tbody id="budget"></tbody></table></div>
+  </div>
+
+  <div class="card">
+    <h2>Saving Suggestions</h2>
+    <div class="description">Practical steps to help improve your finances.</div>
+    <div id="suggestions"></div>
+  </div>
+</section>
+<footer>FINOVA · Make informed financial decisions.</footer>
 </div>
 
-<div id="results" class="hidden">
-<div class="card"><h2>Financial Summary</h2><div class="results">
-<div class="stat"><small>Income</small><strong id="rIncome">₹0</strong></div>
-<div class="stat"><small>Expenses</small><strong id="rExpense">₹0</strong></div>
-<div class="stat"><small>Balance</small><strong id="rBalance">₹0</strong></div>
-<div class="stat"><small>Saving Rate</small><strong id="rRate">0%</strong></div>
-</div><p id="summary"></p><span class="badge" id="source"></span></div>
-<div class="card"><h2>Spending Analysis</h2><table><thead><tr><th>Category</th><th>Spent</th><th>% Income</th><th>Status</th><th>Message</th></tr></thead><tbody id="analysis"></tbody></table></div>
-<div class="card"><h2>Recommended Budget</h2><table><thead><tr><th>Category</th><th>Recommended</th><th>%</th><th>Reason</th></tr></thead><tbody id="budget"></tbody></table></div>
-<div class="card"><h2>Saving Suggestions</h2><div id="suggestions"></div></div>
-</div>
-</div>
 <script>
-const defaults=[["Rent",8000],["Food",2500],["Transport",2000],["Dining",1500],["Entertainment",2500],["Utilities",2000],["Shopping",1000]];
-function addExpense(cat="",amt=""){const d=document.createElement("div");d.className="expense-row";d.innerHTML=`<input class="ec" placeholder="Category" value="${cat}"><input class="ea" type="number" placeholder="Amount" value="${amt}"><button class="remove" type="button" onclick="this.parentElement.remove()">Remove</button>`;document.getElementById("expenses").appendChild(d)}
-defaults.forEach(x=>addExpense(x[0],x[1]));
-function money(n){return "₹"+Number(n||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2})}
-async function analyse(){
- const error=document.getElementById("error");error.classList.add("hidden");
- const expenses={};document.querySelectorAll(".expense-row").forEach(r=>{let c=r.querySelector(".ec").value.trim(),a=parseFloat(r.querySelector(".ea").value);if(c&&Number.isFinite(a))expenses[c]=a});
- const payload={name:document.getElementById("name").value,income:parseFloat(document.getElementById("income").value),expenses,goal:document.getElementById("goal").value};
- try{
-  const res=await fetch("/analyse",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-  const data=await res.json();if(!res.ok||!data.success)throw new Error(data.error||"Analysis failed");
-  document.getElementById("results").classList.remove("hidden");
-  rIncome.textContent=money(data.totals.income);rExpense.textContent=money(data.totals.expense);rBalance.textContent=money(data.totals.balance);rRate.textContent=data.totals.rate+"%";summary.textContent=data.summary;source.textContent=data.source==="gemini-2.0-flash"?"Gemini AI":"Demo fallback";
-  analysis.innerHTML=data.analysis.map(x=>`<tr><td>${x.category}</td><td>${money(x.spent_amount)}</td><td>${x.percentage_of_income}%</td><td>${x.status}</td><td>${x.message}</td></tr>`).join("");
-  budget.innerHTML=data.budget.map(x=>`<tr><td>${x.category}</td><td>${money(x.recommended_amount)}</td><td>${x.percentage}%</td><td>${x.reason}</td></tr>`).join("");
-  suggestions.innerHTML=data.suggestions.map(x=>`<div style="padding:12px 0;border-bottom:1px solid #e2e8f0"><b>${x.title}</b><div>Target: ${x.target} | Amount: ${money(x.amount)}</div><div>${x.action}</div></div>`).join("");
-  document.getElementById("results").scrollIntoView({behavior:"smooth"});
- }catch(e){error.textContent=e.message;error.classList.remove("hidden")}
+const expensesEl = document.getElementById("expenses");
+const errorEl = document.getElementById("error");
+const loadingEl = document.getElementById("loading");
+const analyseBtn = document.getElementById("analyseBtn");
+const resultsEl = document.getElementById("results");
+
+function addExpense(category = "", amount = "") {
+  const row = document.createElement("div");
+  row.className = "expense-row";
+
+  const categoryInput = document.createElement("input");
+  categoryInput.className = "ec";
+  categoryInput.placeholder = "Category (e.g. Food)";
+  categoryInput.setAttribute("aria-label", "Expense category");
+  categoryInput.maxLength = 50;
+  categoryInput.value = category;
+
+  const amountInput = document.createElement("input");
+  amountInput.className = "ea";
+  amountInput.type = "number";
+  amountInput.min = "0";
+  amountInput.max = "100000000";
+  amountInput.step = "0.01";
+  amountInput.placeholder = "Amount (₹)";
+  amountInput.setAttribute("aria-label", "Expense amount");
+  amountInput.value = amount;
+
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button";
+  removeBtn.className = "remove";
+  removeBtn.textContent = "Remove";
+  removeBtn.addEventListener("click", () => {
+    row.remove();
+    if (!expensesEl.children.length) addExpense();
+  });
+
+  row.append(categoryInput, amountInput, removeBtn);
+  expensesEl.appendChild(row);
 }
-function resetForm(){location.reload()}
+
+function money(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "—";
+  return "₹" + number.toLocaleString("en-IN", {
+    minimumFractionDigits: 2, maximumFractionDigits: 2
+  });
+}
+
+function cell(row, value) {
+  const td = document.createElement("td");
+  td.textContent = value == null ? "—" : String(value);
+  row.appendChild(td);
+}
+
+function fillTable(id, rows, columns, formatters) {
+  const tbody = document.getElementById(id);
+  tbody.replaceChildren();
+  if (!Array.isArray(rows) || rows.length === 0) {
+    const tr = document.createElement("tr");
+    cell(tr, "No data available.");
+    const td = tr.firstElementChild;
+    td.colSpan = columns.length;
+    tbody.appendChild(tr);
+    return;
+  }
+  rows.forEach(item => {
+    const tr = document.createElement("tr");
+    columns.forEach((key, index) => {
+      const value = item && item[key] != null ? item[key] : "—";
+      cell(tr, formatters[index] ? formatters[index](value) : value);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function showError(message) {
+  errorEl.textContent = message;
+  errorEl.classList.remove("hidden");
+}
+
+document.getElementById("addBtn").addEventListener("click", () => addExpense());
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  document.getElementById("financeForm").reset();
+  document.getElementById("name").value = "";
+  document.getElementById("income").value = "";
+  expensesEl.replaceChildren();
+  addExpense();
+  errorEl.textContent = "";
+  errorEl.classList.add("hidden");
+  loadingEl.classList.add("hidden");
+  resultsEl.classList.add("hidden");
+  document.getElementById("summary").textContent = "";
+  document.getElementById("source").textContent = "";
+  ["rIncome","rExpense","rBalance","rRate"].forEach(id => {
+    document.getElementById(id).textContent = id === "rRate" ? "0%" : "₹0";
+  });
+  ["analysis","budget","suggestions"].forEach(id => {
+    document.getElementById(id).replaceChildren();
+  });
+  analyseBtn.disabled = false;
+  analyseBtn.textContent = "Analyse My Finances →";
+});
+
+document.getElementById("financeForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  errorEl.textContent = "";
+  errorEl.classList.add("hidden");
+
+  const income = Number(document.getElementById("income").value);
+  if (!Number.isFinite(income) || income <= 0 || income > 100000000) {
+    showError("Please enter a valid monthly income greater than ₹0.");
+    return;
+  }
+
+  const expenses = {};
+  for (const row of expensesEl.querySelectorAll(".expense-row")) {
+    const category = row.querySelector(".ec").value.trim();
+    const rawAmount = row.querySelector(".ea").value.trim();
+
+    if (!category && !rawAmount) continue;
+    if (!category || !rawAmount) {
+      showError("Complete both the category and amount for every expense row.");
+      return;
+    }
+
+    const amount = Number(rawAmount);
+    if (!Number.isFinite(amount) || amount < 0 || amount > 100000000) {
+      showError("Enter a valid non-negative amount for " + category + ".");
+      return;
+    }
+    if (Object.keys(expenses).some(key => key.toLowerCase() === category.toLowerCase())) {
+      showError("Each expense category must be unique. Duplicate: " + category + ".");
+      return;
+    }
+    expenses[category] = amount;
+  }
+
+  if (!Object.keys(expenses).length) {
+    showError("Please add at least one expense category and amount.");
+    return;
+  }
+
+  const payload = {
+    name: document.getElementById("name").value.trim(),
+    income,
+    expenses,
+    goal: document.getElementById("goal").value
+  };
+
+  analyseBtn.disabled = true;
+  analyseBtn.textContent = "Analysing…";
+  loadingEl.classList.remove("hidden");
+
+  try {
+    const response = await fetch("/analyse", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(payload)
+    });
+
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      throw new Error("The server returned an unexpected response. Check your Render deployment logs.");
+    }
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Analysis failed. Please try again.");
+    }
+
+    if (!data.totals || !Array.isArray(data.analysis) ||
+        !Array.isArray(data.budget) || !Array.isArray(data.suggestions)) {
+      throw new Error("The server response is incomplete. Please check your backend.");
+    }
+
+    document.getElementById("rIncome").textContent = money(data.totals.income);
+    document.getElementById("rExpense").textContent = money(data.totals.expense);
+    document.getElementById("rBalance").textContent = money(data.totals.balance);
+    document.getElementById("rRate").textContent = Number(data.totals.rate) + "%";
+    document.getElementById("summary").textContent = data.summary || "Analysis complete.";
+    document.getElementById("source").textContent =
+      data.source === "gemini-2.0-flash" ? "Gemini AI Analysis" : "Demo Analysis";
+
+    fillTable("analysis", data.analysis,
+      ["category","spent_amount","percentage_of_income","status","message"],
+      [null, money, value => value + "%", null, null]);
+
+    fillTable("budget", data.budget,
+      ["category","recommended_amount","percentage","reason"],
+      [null, money, value => value + "%", null]);
+
+    const suggestionsEl = document.getElementById("suggestions");
+    suggestionsEl.replaceChildren();
+    data.suggestions.forEach(item => {
+      const section = document.createElement("div");
+      section.className = "suggestion";
+      const title = document.createElement("b");
+      title.textContent = item.title || "Suggestion";
+      const target = document.createElement("div");
+      target.textContent = "Target: " + (item.target || "—") +
+        " · Suggested amount: " + money(item.amount);
+      const action = document.createElement("div");
+      action.textContent = item.action || "";
+      section.append(title, target, action);
+      suggestionsEl.appendChild(section);
+    });
+
+    resultsEl.classList.remove("hidden");
+    resultsEl.scrollIntoView({behavior:"smooth", block:"start"});
+  } catch (error) {
+    showError(error.message || "Something went wrong. Please try again.");
+  } finally {
+    loadingEl.classList.add("hidden");
+    analyseBtn.disabled = false;
+    analyseBtn.textContent = "Analyse My Finances →";
+  }
+});
+
+// Start with a genuinely blank form: no saved name or sample expenses.
+addExpense();
 </script>
 </body>
 </html>
+```
