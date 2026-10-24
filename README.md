@@ -1,123 +1,121 @@
-# Personal Finance Advisor Bot — SkillWallet AI Specialist Capstone
+# Finova — Personal Finance Advisor
 
-This implementation follows the supplied SkillWallet project workflow:
-- Gemini API key configuration
-- Gemini `gemini-2.0-flash` model
-- Flask backend
-- `/analyse` POST endpoint using JSON/AJAX
-- `build_prompt()` prompt-engineering helper
-- `CATEGORY_TIPS` and `GOAL_DESCRIPTIONS`
-- `extract_json()` robust response parser
-- Single-page HTML/CSS/JavaScript interface
-- Dynamic budget, analysis and saving-suggestion rendering
-- Local deployment on port 5090
-- Public deployment with Ngrok using `run_public.py`
+A Flask-based web application for reviewing monthly income and expenses, analysing spending, viewing suggested category budgets, and receiving practical saving suggestions.
+
+## Live Demo
+https://personal-finance-advisor-bot-9phg.onrender.com
+
+Please open and test the live link before evaluation. The link alone does not guarantee that the service is currently available.
 
 ## Features
+- Enter monthly income, expense categories, and a financial goal.
+- View total expenses, remaining balance, and saving rate.
+- Review category-wise spending analysis and recommended budgets.
+- Get practical saving suggestions.
+- Use Gemini AI when `GEMINI_API_KEY` is configured.
+- Use a demo fallback when Gemini is not configured.
+- Save analysis records using SQLite.
+- Responsive dark interface with blank inputs on page load and a Reset Form action.
 
-1. Personalized monthly budget
-2. Spending analysis by category
-3. 3–5 saving suggestions
-4. Financial goal selection
-5. Monthly income and expense input
-6. Balance and saving-rate calculation
-7. SQLite/SQLAlchemy record storage
-8. Responsive frontend
-9. Gemini AI integration
-10. Demo fallback when no Gemini API key is configured
+## Technology Stack
+Python, Flask, Flask-SQLAlchemy, SQLite, Google Gemini API (`google-generativeai`), HTML, CSS, JavaScript, Gunicorn, and Render.
 
-## Folder structure
+## Run Locally
 
-```text
-Personal_Finance_Advisor_Bot_SkillWallet/
-├── app.py
-├── run_public.py
-├── requirements.txt
-├── .env.example
-├── .gitignore
-├── README.md
-├── templates/
-│   └── index.html
-└── static/
-    ├── css/
-    │   └── style.css
-    └── js/
-        └── main.js
+### 1. Clone the repository
+```bash
+git clone https://github.com/sumittajne/Personal-Finance-Advisor-Bot.git
+cd Personal-Finance-Advisor-Bot
 ```
 
-## 1. Create environment
+### 2. Create a virtual environment
+Windows PowerShell:
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
 
-Windows Command Prompt:
-
+If activation is blocked, use Command Prompt:
 ```bat
-python -m venv myenv
-myenv\Scripts\activate
+.venv\Scripts\activate.bat
+```
+
+### 3. Install dependencies
+```bash
 pip install -r requirements.txt
 ```
+Ensure `gunicorn` is in `requirements.txt` for Render.
 
-## 2. Configure Gemini
-
-Copy `.env.example` to `.env` and put your Gemini API key in:
-
+### 4. Configure Gemini (optional)
+Create a local `.env` file:
 ```text
-GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_API_KEY=your_gemini_api_key
+SECRET_KEY=replace_with_a_random_secret
 ```
+Never commit `.env` or publish your API key. Without a Gemini key, the app can use its demo fallback.
 
-Never commit `.env` to GitHub.
-
-## 3. Run locally
-
-```bat
+### 5. Start the app
+```bash
 python app.py
 ```
+Open http://127.0.0.1:5090
 
-Open:
+## How to Use
+1. Open the application.
+2. Enter a positive monthly income and, optionally, your name.
+3. Add expense categories and amounts.
+4. Choose a financial goal.
+5. Click **Analyse My Finances**.
+6. Review the overview, spending analysis, recommended budget, and saving suggestions.
+7. Click **Reset Form** to clear inputs and results.
 
+## API Endpoints
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/` | Displays the web application |
+| POST | `/analyse` | Validates inputs and returns the financial analysis |
+| GET | `/health` | Returns a simple health status |
+
+Example request to `/analyse`:
+```json
+{
+  "name": "Alex",
+  "income": 30000,
+  "expenses": {"Rent": 8000, "Food": 2500, "Transport": 1500},
+  "goal": "Emergency Fund"
+}
+```
+
+A successful response includes `success`, `totals`, `analysis`, `budget`, `suggestions`, `summary`, and `source`.
+
+## Render Deployment
+- Build command: `pip install -r requirements.txt`
+- Start command: `gunicorn app:app`
+- Add `GEMINI_API_KEY` under Render Environment settings if Gemini analysis is needed.
+- After deployment, test the homepage, `/health`, form submission, analysis results, and reset button.
+
+## Important Notes
+- Suggestions are general educational guidance, not professional financial, tax, or investment advice.
+- The app uses SQLite. Data on a hosting provider's local filesystem may not persist across redeploys or instance replacement unless persistent storage is configured.
+- Do not enter sensitive real financial information into a demo deployment.
+- A successful deployment does not prove every feature works; test the live demo before evaluation.
+
+## Project Structure
 ```text
-http://127.0.0.1:5090
+Personal-Finance-Advisor-Bot/
+├── app.py
+├── requirements.txt
+├── run_public.py
+├── templates/
+│   └── index.html
+├── .env.example
+├── .gitignore
+├── package.json
+└── README.md
 ```
 
-## 4. Test
+## Author
+**Sumit Tajne**
 
-Example:
-
-```text
-Name: Sumit
-Income: 30000
-
-Rent: 8000
-Food: 2500
-Transport: 2000
-Dining: 1500
-Entertainment: 2500
-Utilities: 2000
-Shopping: 1000
-
-Goal: Emergency Fund
-```
-
-Click **Analyse My Finances**.
-
-The frontend sends a JSON POST request to `/analyse`. Flask validates the data, constructs the financial prompt, calls Gemini, parses the JSON response and returns structured results.
-
-## 5. Public deployment with Ngrok
-
-Add your token to `.env`:
-
-```text
-NGROK_AUTHTOKEN=your_ngrok_authtoken_here
-```
-
-Then run:
-
-```bat
-python run_public.py
-```
-
-The terminal prints a public `ngrok-free.app` URL. Keep the terminal running while demonstrating the project.
-
-## Important
-
-The project has a transparent local fallback. If `GEMINI_API_KEY` is missing, the application still demonstrates the complete UI and budgeting workflow using deterministic analysis. When a valid key is supplied, the response source badge changes to `Gemini AI`.
-
-This is an educational budgeting assistant, not professional financial or investment advice.
+Personal Finance Advisor Bot — project submission documentation.
